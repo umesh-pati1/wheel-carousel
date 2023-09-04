@@ -1,3 +1,7 @@
+// it will work if slideslength >=6
+
+// minimum slides 4 , not working
+
 const container = document.querySelector(".container");
 
 const galleryEL = container.querySelector(".gallery");
