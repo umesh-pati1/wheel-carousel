@@ -18,21 +18,25 @@ container.style.setProperty("--t", `${transitionTime}ms`);
 setInterval(() => {
   hide = (currentIndex - 2 + slidesLength) % slidesLength;
   show = (currentIndex + 4) % slidesLength;
-  currentIndex = (currentIndex + 1) % slidesLength;
 
   const hideEl = slides[hide];
   const showEl = slides[show];
-  hideEl.style.display = "none";
-  showEl.style.display = "block";
-
   const styles = getComputedStyle(hideEl);
-
   const newRotate = styles.getPropertyValue("rotate");
 
-  // console.log(newRotate);
+  if (slides.length >= 6) {
+    hideEl.style.display = "none";
+    showEl.style.display = "block";
+    showEl.style.rotate = newRotate;
+  } else if (slides.length === 4) {
+    hideEl.style.rotate = parseInt(newRotate) - 120 + "deg";
+  } else if (slides.length === 5) {
+    hideEl.style.rotate = parseInt(newRotate) - 60 + "deg";
+  }
 
-  showEl.style.rotate = newRotate;
-
-  rotate = (rotate + 60) % (60 * slidesLength);
+  currentIndex = (currentIndex + 1) % slidesLength;
+  rotate = rotate + 60;
   galleryEL.style.transform = `rotate(-${rotate}deg)`;
+
+  // if your gallery is in view then only start the animation , otherwise reset to initial state
 }, transitionTime);
