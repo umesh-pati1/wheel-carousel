@@ -3,115 +3,44 @@
 // minimum slides 4 , not working
 
 const container = document.querySelector(".container");
-const prevBtn = document.querySelector(".prev-btn");
-const nextBtn = document.querySelector(".next-btn");
 
 const maskEl = document.querySelector(".mask");
 
 const galleryEL = container.querySelector(".gallery");
 const slides = galleryEL.querySelectorAll(".slide");
 
-const dots = document.querySelectorAll(".dot");
-var interval;
-
-dots.forEach((dot) => {
-  dot.addEventListener("click", dotClick);
-});
-
 const transitionTime = 2000;
 const slidesLength = slides.length;
 const autoplay = true;
 
+var interval;
 var mylatesttap;
+var currentIndex = 0;
+var rotate = 0;
+
+createDot();
+const dots = document.getElementsByClassName("dot");
 
 console.assert(slides.length === dots.length, "length mismatch");
-let currentIndex = 0;
-let rotate = 0;
 
 dots[currentIndex].classList.add("active");
-
 container.style.setProperty("--t", `${transitionTime}ms`);
 
-function next() {
-  clearInterval(interval);
-  console.log("hi");
-  const prev = (currentIndex + 2) % slidesLength;
-  const next = (currentIndex - 2 + slidesLength) % slidesLength;
-  const dummy = (currentIndex + 3) % slidesLength;
+autoplayFn();
 
-  const dummyEl = slides[dummy];
-  const prevEl = slides[prev];
-  const nextEl = slides[next];
-
-  const prevElStyles = getComputedStyle(prevEl);
-  const newRotate = prevElStyles.getPropertyValue("rotate");
-
-  dummyEl.style.display = "block";
-
-  dummyEl.style.rotate = parseInt(newRotate) + 60 + "deg";
-
-  nextEl.style.display = "none";
-
-  currentIndex = (currentIndex + 1) % slidesLength;
-
-  const activeDot = document.querySelector(".dot.active");
-
-  activeDot.classList.remove("active");
-
-  // currentIndex = index;
-  dots[currentIndex].classList.add("active");
-
-  rotate = rotate - 60;
-  galleryEL.style.transform = `rotate(${rotate}deg)`;
-
-  autoplayFn();
+for (let i = 0; i < dots.length; i++) {
+  let item = dots[i];
+  item.addEventListener("click", dotClick);
 }
 
-function prev() {
-  clearInterval(interval);
+maskEl.addEventListener("click", (e) => {
+  const { top, left, width, height } = e.target.getBoundingClientRect();
 
-  const prev = (currentIndex - 2 + slidesLength) % slidesLength;
-  const next = (currentIndex + 2) % slidesLength;
-  const dummy = (currentIndex - 3 + slidesLength) % slidesLength;
+  const x = e.clientX - left; //x position within the element.
+  // const y = e.clientY - top; //y position within the element.
 
-  const dummyEl = slides[dummy];
-  const prevEl = slides[prev];
-  const nextEl = slides[next];
-
-  const prevElStyles = getComputedStyle(prevEl);
-  const newRotate = prevElStyles.getPropertyValue("rotate");
-
-  dummyEl.style.display = "block";
-
-  dummyEl.style.rotate = parseInt(newRotate) - 60 + "deg";
-
-  nextEl.style.display = "none";
-
-  currentIndex = (currentIndex - 1 + slidesLength) % slidesLength;
-
-  const activeDot = document.querySelector(".dot.active");
-
-  activeDot.classList.remove("active");
-
-  // currentIndex = index;
-  dots[currentIndex].classList.add("active");
-
-  rotate = rotate + 60;
-
-  // galleryEL.style. = `${rotate}deg`;
-  galleryEL.style.transform = `rotate(${rotate}deg)`;
-
-  console.log("gallery", galleryEL);
-
-  autoplayFn();
-}
-
-console.log(nextBtn);
-prevBtn.addEventListener("click", () => {
-  tap(prev);
-});
-nextBtn.addEventListener("click", () => {
-  tap(next);
+  if (x < width / 4) prev();
+  else if (x > (3 * width) / 4) next();
 });
 
 function autoplayFn() {
@@ -121,17 +50,13 @@ function autoplayFn() {
     }, transitionTime);
 }
 
-autoplayFn();
-function tap(fn) {
-  var now = new Date().getTime();
-  var timesince = now - mylatesttap;
-
-  if (isNaN(timesince) || timesince > transitionTime) {
-    fn();
-    mylatesttap = new Date().getTime();
-  } else {
-    console.log("clicked quikly");
+function createDot() {
+  const dotsContainer = document.querySelector(".dots");
+  let html = "";
+  for (let i = 0; i < slidesLength; i++) {
+    html = html + `<li class="dot"></li>`;
   }
+  dotsContainer.innerHTML = html;
 }
 
 function dotClick(event) {
@@ -170,12 +95,93 @@ function dotClick(event) {
   }, 50);
 }
 
-maskEl.addEventListener("click", (e) => {
-  const { top, left, width, height } = e.target.getBoundingClientRect();
+function next() {
+  clearInterval(interval);
+  console.log("hi");
+  const prev = (currentIndex + 2) % slidesLength;
+  const next = (currentIndex - 2 + slidesLength) % slidesLength;
+  const dummy = (currentIndex + 3) % slidesLength;
 
-  const x = e.clientX - left; //x position within the element.
-  // const y = e.clientY - top; //y position within the element.
+  const dummyEl = slides[dummy];
+  const prevEl = slides[prev];
+  const nextEl = slides[next];
 
-  if (x < width / 4) prev();
-  else if (x > (3 * width) / 4) next();
-});
+  const prevElStyles = getComputedStyle(prevEl);
+  const newRotate = prevElStyles.getPropertyValue("rotate");
+
+  if (slidesLength >= 6) {
+    dummyEl.style.display = "block";
+
+    dummyEl.style.rotate = parseInt(newRotate) + 60 + "deg";
+
+    nextEl.style.display = "none";
+  } else if (slidesLength === 5) {
+    dummyEl.style.rotate = parseInt(newRotate) + 60 + "deg";
+  } else if (slidesLength == 4) {
+    console.log(prevEl);
+    // const dummy = (currentIndex + 2) % slidesLength;
+    // const dummyEl = slides[dummy];
+    prevEl.style.rotate = parseInt(newRotate) - 120 + "deg";
+  }
+
+  currentIndex = (currentIndex + 1) % slidesLength;
+
+  const activeDot = document.querySelector(".dot.active");
+
+  activeDot.classList.remove("active");
+
+  console.log(currentIndex);
+
+  // currentIndex = index;
+  dots[currentIndex].classList.add("active");
+
+  rotate = rotate - 60;
+  galleryEL.style.transform = `rotate(${rotate}deg)`;
+
+  autoplayFn();
+}
+
+function prev() {
+  clearInterval(interval);
+
+  const prev = (currentIndex - 2 + slidesLength) % slidesLength;
+  const next = (currentIndex + 2) % slidesLength;
+  const dummy = (currentIndex - 3 + slidesLength) % slidesLength;
+
+  const dummyEl = slides[dummy];
+  const prevEl = slides[prev];
+  const nextEl = slides[next];
+
+  const prevElStyles = getComputedStyle(prevEl);
+  const newRotate = prevElStyles.getPropertyValue("rotate");
+
+  if (slidesLength >= 6) {
+    dummyEl.style.display = "block";
+
+    dummyEl.style.rotate = parseInt(newRotate) - 60 + "deg";
+
+    nextEl.style.display = "none";
+  } else if (slidesLength === 5) {
+    dummyEl.style.rotate = parseInt(newRotate) - 60 + "deg";
+  } else {
+    dummyEl.style.rotate = parseInt(newRotate) - 120 + "deg";
+  }
+
+  currentIndex = (currentIndex - 1 + slidesLength) % slidesLength;
+
+  const activeDot = document.querySelector(".dot.active");
+
+  activeDot.classList.remove("active");
+
+  // currentIndex = index;
+  dots[currentIndex].classList.add("active");
+
+  rotate = rotate + 60;
+
+  // galleryEL.style. = `${rotate}deg`;
+  galleryEL.style.transform = `rotate(${rotate}deg)`;
+
+  console.log("gallery", galleryEL);
+
+  autoplayFn();
+}
